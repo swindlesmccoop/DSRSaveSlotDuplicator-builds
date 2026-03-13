@@ -1,0 +1,36 @@
+name: Build DSRSaveSlotDuplicator
+
+on:
+  push:
+    branches: [ "main", "master" ]
+  pull_request:
+    branches: [ "main", "master" ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Setup .NET 8
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: 8.0.x
+
+    - name: Restore dependencies
+      run: dotnet restore DSRSaveSlotDuplicator.sln
+
+    - name: Build the solution
+      run: dotnet build DSRSaveSlotDuplicator.sln -c Release --no-restore
+
+    - name: Publish the application
+      run: dotnet publish DSRSaveSlotDuplicator/DSRSaveSlotDuplicator.csproj -c Release -r win-x64 --self-contained false -o ./publish-output
+
+    - name: Upload Build Artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: DSRSaveSlotDuplicator-Win64
+        path: ./publish-output
